@@ -783,19 +783,10 @@ function exportPDF(){
 function copyShareLink(){
   saveCurrentQuote();var q=getQ();if(!q)return;
   var data=btoa(unescape(encodeURIComponent(JSON.stringify(q))));
-  var longUrl=location.href.split('#')[0]+'#view='+data;
-  document.getElementById('share-url-text').textContent='生成中...';
+  var url=location.href.split('#')[0]+'#view='+data;
+  document.getElementById('share-url-text').textContent=url;
   document.getElementById('share-bar').style.display='flex';
-  fetch('https://cleanuri.com/api/v1/shorten',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'url='+encodeURIComponent(longUrl)})
-    .then(function(r){return r.json();})
-    .then(function(short){short=short.result_url;
-      document.getElementById('share-url-text').textContent=short;
-      navigator.clipboard.writeText(short).then(function(){showToast('短链已复制');}).catch(function(){});
-    })
-    .catch(function(){
-      document.getElementById('share-url-text').textContent=longUrl;
-      navigator.clipboard.writeText(longUrl).then(function(){showToast('链接已复制');}).catch(function(){});
-    });
+  navigator.clipboard.writeText(url).then(function(){showToast('链接已复制');}).catch(function(){});
 }
 function checkSharedView(){
   var hash=location.hash;if(!hash.startsWith('#view='))return;
