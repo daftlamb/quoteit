@@ -786,9 +786,9 @@ function copyShareLink(){
   var longUrl=location.href.split('#')[0]+'#view='+data;
   document.getElementById('share-url-text').textContent='生成中...';
   document.getElementById('share-bar').style.display='flex';
-  fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(longUrl))
-    .then(function(r){return r.text();})
-    .then(function(short){
+  fetch('https://cleanuri.com/api/v1/shorten',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'url='+encodeURIComponent(longUrl)})
+    .then(function(r){return r.json();})
+    .then(function(short){short=short.result_url;
       document.getElementById('share-url-text').textContent=short;
       navigator.clipboard.writeText(short).then(function(){showToast('短链已复制');}).catch(function(){});
     })
