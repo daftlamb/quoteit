@@ -786,7 +786,7 @@ function copyShareLink(){
   var longUrl=location.href.split('#')[0]+'#view='+data;
   document.getElementById('share-url-text').textContent='生成中...';
   document.getElementById('share-bar').style.display='flex';
-  fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(longUrl))
+  fetch('https://is.gd/create.php?format=simple&url='+encodeURIComponent(longUrl))
     .then(function(r){return r.text();})
     .then(function(short){
       document.getElementById('share-url-text').textContent=short;
