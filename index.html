@@ -50,6 +50,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .btn{padding:7px 15px;border-radius:6px;border:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;transition:all 0.15s;}
 .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);}
 .btn-ghost:hover{border-color:var(--text);color:var(--text);}
+.btn-row button svg,.btn-row button i[data-lucide]{width:14px;height:14px;vertical-align:middle;}
 .btn-primary{background:var(--accent);color:#fff;}
 .btn-primary:hover{background:var(--accent2);}
 .btn-danger{background:transparent;border:1px solid var(--border2);color:var(--red);}
@@ -776,15 +777,22 @@ function renderPreview(){
 
 // ── PDF Export ─────────────────────────────────────────
 function exportPNG(){
-  var q=getQ();if(!q)return;
-  var el=document.querySelector('.preview');if(!el)return;
-  html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#fff'}).then(function(canvas){
-    var a=document.createElement('a');
-    var d=new Date().toISOString().slice(0,10);
-    a.download='quoteit-'+(q.name||'quote')+'-'+d+'.png';
-    a.href=canvas.toDataURL('image/png');
-    a.click();
-  });
+  var q=getQ();if(!q){showAlert('提示','请先选择报价单');return;}
+  var wasOpen=previewOpen;
+  if(!previewOpen){previewOpen=true;document.getElementById('preview-panel').classList.add('open');applyOrientation();renderPreviewToolbar();renderPreview();}
+  setTimeout(function(){
+    var el=document.getElementById('preview-panel');
+    if(!el){showAlert('错误','找不到预览区域');return;}
+    showToast('正在导出 PNG...');
+    html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#fff'}).then(function(canvas){
+      var a=document.createElement('a');
+      var d=new Date().toISOString().slice(0,10);
+      a.download='quoteit-'+(q.name||'quote')+'-'+d+'.png';
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+      if(!wasOpen){previewOpen=false;document.getElementById('preview-panel').classList.remove('open');}
+    }).catch(function(e){showAlert('导出失败',e.message);});
+  },300);
 }
 function exportPDF(){
   var q=getQ();if(!q){showAlert('提示','请先选择报价单');return;}
