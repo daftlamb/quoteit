@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quote It — Mog Design</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -506,7 +507,8 @@ function renderPaletteChips(){
 }
 
 // ── Items ──────────────────────────────────────────────
-function addItem(){var q=getQ();if(!q)return;q.items.push({type:'item',name:'',cat:CATS[0],qty:1,price:0,start:'',end:''});renderItems();renderSummary();renderGantt();}
+function addItem(){var q=getQ();if(!q)return;q.items.push({type:'item',name:'',cat:CATS[0],qty:1,price:0,start:'',end:'',note:''});renderItems();renderSummary();renderGantt();}
+function toggleNote(i){var r=document.getElementById('note-row-'+i);if(r)r.style.display=r.style.display==='none'?'flex':'none';}
 function addGroup(){var q=getQ();if(!q)return;q.items.push({type:'group',name:'分组标题'});renderItems();}
 function removeItem(idx){var q=getQ();if(!q)return;q.items.splice(idx,1);renderItems();renderSummary();renderGantt();}
 function updateItem(idx,field,val){
@@ -728,6 +730,7 @@ function renderPreview(){
       if(vis.qty)html+='<td class="r">'+(it.qty||0)+'</td>';
       if(vis.price)html+='<td class="r">'+cur+(parseFloat(it.price)||0).toLocaleString()+'</td>';
       html+='<td class="r">'+cur+sub.toLocaleString()+'</td></tr>';
+      if(it.note)html+='<tr><td colspan="4" style="font-size:11px;color:#999;padding:0 8px 6px 16px;">'+esc(it.note)+'</td></tr>';
     }
   });
   html+='</tbody></table></div>';
@@ -753,6 +756,17 @@ function renderPreview(){
 }
 
 // ── PDF Export ─────────────────────────────────────────
+function exportPNG(){
+  var q=getQ();if(!q)return;
+  var el=document.querySelector('.preview');if(!el)return;
+  html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#fff'}).then(function(canvas){
+    var a=document.createElement('a');
+    var d=new Date().toISOString().slice(0,10);
+    a.download='quoteit-'+(q.name||'quote')+'-'+d+'.png';
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+  });
+}
 function exportPDF(){
   var q=getQ();if(!q){showAlert('提示','请先选择报价单');return;}
   showToast('正在生成 PDF...');
@@ -780,6 +794,42 @@ function exportPDF(){
 }
 
 // ── Share ──────────────────────────────────────────────
+function uploadSeal(){
+  var inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=function(e){
+    var file=e.target.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){var q=getQ();if(!q)return;q.sealImg=ev.target.result;q.sealSize=q.sealSize||120;renderPreview();};
+    reader.readAsDataURL(file);
+  };inp.click();
+}
+function removeSeal(){var q=getQ();if(!q)return;q.sealImg='';renderPreview();}
+function setSealSize(s){var q=getQ();if(!q)return;q.sealSize=s;renderPreview();}
+function backupJSON(){
+  var data={};for(var k in localStorage)if(localStorage.hasOwnProperty(k))data[k]=localStorage[k];
+  var a=document.createElement('a');
+  a.download='quoteit-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,2));
+  a.click();
+}
+function importJSON(){
+  if(!confirm('导入将覆盖现有数据，确认继续？'))return;
+  var inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=function(e){
+    var file=e.target.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        var data=JSON.parse(ev.target.result);
+        localStorage.clear();
+        for(var k in data)localStorage.setItem(k,data[k]);
+        location.reload();
+      }catch(err){alert('文件格式错误');}
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
 function copyShareLink(){
   saveCurrentQuote();var q=getQ();if(!q)return;
   var data=btoa(unescape(encodeURIComponent(JSON.stringify(q))));
@@ -873,6 +923,10 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
   if(quotes.length)loadQuote(quotes[0].id);else newQuote();
+  document.addEventListener('keydown',function(e){
+    if((e.metaKey||e.ctrlKey)&&e.key==='s'){e.preventDefault();saveCurrentQuote();showToast('已保存');}
+    if((e.metaKey||e.ctrlKey)&&e.key==='n'){e.preventDefault();newQuote();}
+  });
 });
 </script>
 </body>
