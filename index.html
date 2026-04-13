@@ -162,6 +162,7 @@ tr.drag-target-below td{border-bottom:2px solid var(--accent);}
   input,select,textarea{border:none;background:transparent;padding:0;}
 }
 </style>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -554,7 +555,7 @@ function renderItems(){
       if(vis.start) html+='<td><input type="date" value="'+(item.start||'')+'" onchange="updateItem('+idx+',\'start\',this.value)"></td>';
       if(vis.end)   html+='<td><input type="date" value="'+(item.end||'')+'" onchange="updateItem('+idx+',\'end\',this.value)"></td>';
       html+='<td><button class="item-del-btn" onclick="removeItem('+idx+')">✕</button></td>';
-      html+='<td><button class="item-note-btn" title="备注" onclick="toggleNote('+idx+')" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:0.5;padding:0 2px;">📝</button></td>';
+      html+='<td><button class="item-note-btn" title="备注" onclick="toggleNote('+idx+')" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:0.5;padding:0 2px;"><i data-lucide="pencil-line"></i></button></td>';
       tr.innerHTML=html;
       // note row
       if(item.note!==undefined){
@@ -941,5 +942,6 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 });
 </script>
+<script>if(window.lucide)lucide.createIcons();</script>
 </body>
 </html>
