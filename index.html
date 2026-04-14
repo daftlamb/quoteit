@@ -866,7 +866,7 @@ function copyShareLink(){
   navigator.clipboard.writeText(url).then(function(){showToast('链接已复制');}).catch(function(){});
 }
 function checkSharedView(){
-  var hash=location.hash;if(!hash.startsWith('#view='))return;
+  var hash=location.hash;if(!hash.startsWith('#view='))return false;
   try{
     var data=JSON.parse(decodeURIComponent(escape(atob(hash.slice(6)))));
     document.getElementById('sidebar').style.display='none';
@@ -876,7 +876,9 @@ function checkSharedView(){
     panel.classList.add('open');panel.style.flex='1';panel.style.minWidth='0';
     quotes=[data];currentId=data.id;
     applyOrientation();renderPreviewToolbar();renderPreview();
+    return true;
   }catch(e){}
+  return false;
 }
 
 // ── Settings ───────────────────────────────────────────
@@ -925,8 +927,7 @@ function initResize(){
 document.addEventListener('DOMContentLoaded',function(){
   loadStorage();
   initResize();
-  checkSharedView();
-  if(location.hash.startsWith('#view='))return;
+  if(checkSharedView())return;
   document.getElementById('btn-new-quote').addEventListener('click',newQuote);
   document.getElementById('btn-new-folder').addEventListener('click',newFolder);
   document.getElementById('btn-add-item').addEventListener('click',addItem);
